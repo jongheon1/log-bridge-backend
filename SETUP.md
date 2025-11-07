@@ -37,43 +37,73 @@ ngrok에서 제공하는 URL (예: `https://abc123.ngrok.io`)을 사용:
 
 ## 2. 애플리케이션 설정
 
-### 2.1 application.properties 수정
+### 2.1 환경변수 설정 (필수)
 
-`src/main/resources/application.properties` 파일을 열고 다음 값을 입력:
+민감한 정보는 `.env` 파일로 관리합니다.
 
-```properties
+#### 1. `.env` 파일 생성
+
+```bash
+cp .env.example .env
+```
+
+#### 2. `.env` 파일 수정
+
+`.env` 파일을 열어서 실제 값으로 수정:
+
+```bash
+# Database Configuration
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+
 # ChannelTalk Configuration
-channeltalk.app-id=YOUR_APP_ID_HERE          # 앱 ID
-channeltalk.app-secret=YOUR_APP_SECRET_HERE  # 발급받은 App Secret
-channeltalk.api-base-url=https://app-store-api.channel.io
-channeltalk.signing-key=YOUR_SIGNING_KEY_HERE # 발급받은 Signing Key
+CHANNELTALK_APP_ID=your_app_id
+CHANNELTALK_APP_SECRET=your_app_secret
+CHANNELTALK_SIGNING_KEY=your_signing_key
 
-# Server Configuration
-server.port=8080
+# ChannelTalk Open API
+CHANNELTALK_OPEN_API_ACCESS_KEY=your_open_api_access_key
+CHANNELTALK_OPEN_API_ACCESS_SECRET=your_open_api_access_secret
+
+# ChannelTalk Document API
+CHANNELTALK_DOCUMENT_API_ACCESS_KEY=your_document_api_access_key
+CHANNELTALK_DOCUMENT_API_ACCESS_SECRET=your_document_api_access_secret
+
+# Claude API Configuration
+CLAUDE_API_KEY=your_claude_api_key
+```
+
+#### 3. 환경변수 로드
+
+실행하기 전에 환경변수를 로드:
+
+```bash
+source load-env.sh
 ```
 
 #### 설정 값 찾는 방법:
 
-- **app-id**: Developer Portal의 앱 페이지 URL에서 확인
-  - 예: `https://developers.channel.io/apps/12345` → App ID는 `12345`
-- **app-secret**: 1.2 단계에서 발급받은 값
-- **signing-key**: 1.4 단계에서 생성한 값
+- **CHANNELTALK_APP_ID**: Developer Portal의 앱 페이지 URL에서 확인
+- **CHANNELTALK_APP_SECRET**: 1.2 단계에서 발급받은 값
+- **CHANNELTALK_SIGNING_KEY**: 1.4 단계에서 생성한 값
+- **CHANNELTALK_OPEN_API_ACCESS_KEY/SECRET**: Open API 설정에서 발급
+- **CHANNELTALK_DOCUMENT_API_ACCESS_KEY/SECRET**: Document API 설정에서 발급
+- **CLAUDE_API_KEY**: Claude Console에서 발급받은 API 키
 
-### 2.2 환경 변수로 관리 (권장)
+### 2.2 데이터베이스 설정
 
-보안을 위해 환경 변수로 관리하는 것을 권장:
+MySQL 데이터베이스를 준비:
 
 ```bash
-export CHANNELTALK_APP_ID=your_app_id
-export CHANNELTALK_APP_SECRET=your_app_secret
-export CHANNELTALK_SIGNING_KEY=your_signing_key
-```
+# Docker로 MySQL 실행 (권장)
+docker-compose up -d
 
-application.properties 수정:
-```properties
-channeltalk.app-id=${CHANNELTALK_APP_ID}
-channeltalk.app-secret=${CHANNELTALK_APP_SECRET}
-channeltalk.signing-key=${CHANNELTALK_SIGNING_KEY}
+# 또는 직접 MySQL 설치 후 데이터베이스 생성
+mysql -u root -p
+CREATE DATABASE vocinsight;
+CREATE USER 'vocuser'@'localhost' IDENTIFIED BY 'vocpass1234';
+GRANT ALL PRIVILEGES ON vocinsight.* TO 'vocuser'@'localhost';
+FLUSH PRIVILEGES;
 ```
 
 ## 3. 빌드 및 실행
